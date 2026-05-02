@@ -25,6 +25,13 @@
 void main(void)
 {
     PowerOnLed(); // Requirement to have a power LED.
+    
+    __delay_ms(2000);
+    
+    LCD_Init();
+    LCD_String_xy(1, 0, "Password is 23");
+    LCD_String_xy(2, 0, "");
+    
     BuzzerInterruptConfig(); // Configures PORTC0 for INT0 Interrupt.
     CounterInterruptConfig(); // Configures PORTC1 for INT1 Interrupt.
     TimerEnable();
@@ -32,9 +39,10 @@ void main(void)
     
     while(1)
     {
-
         if(nowCount)
         {
+            LCD_String_xy(2, 0, "Entered:      ");
+
             Count();
             
             if (lowerCount == 3 && upperCount == 2)

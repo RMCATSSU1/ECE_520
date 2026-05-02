@@ -1,3 +1,4 @@
+
 #ifndef PROGRAM_FUNCTIONS_H
 #define PROGRAM_FUNCTIONS_H
 
@@ -37,4 +38,9 @@ void IncorrectPassword (void);
 void CorrectPassword (void);
 void Count (void);
 
+void LCD_Init(void);
+void LCD_Command(char);
+void LCD_Char(char);
+void LCD_String(const char *);
+void LCD_String_xy(char, char, const char *);
 #endif

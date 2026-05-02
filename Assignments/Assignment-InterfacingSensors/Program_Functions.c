@@ -1,25 +1,8 @@
-/*******************************************************************************
- * PROJECT:     Password Entry and Notification System
- * FILENAME:    Program_Functions.c
- * AUTHOR:      Jason Knight-Han
- * DATE:        April 27, 2026
- * VERSION:     1.0.0
- * * DESCRIPTION:
- * Implementation of system-level functions including hardware initialization,
- * interrupt service routines (ISRs), and core logic.
- * * CORE LOGIC:
- * - Interrupts: Utilizes INT0 (B0) and INT1 (B1) for user triggers.
- * - Counting: Uses Timer0 (A0) and Timer1 (A1) as hardware counters to 
- * capture pulses from photoresistors during 4-second windows.
- * - Feedback: Includes a standard SOS Morse code buzzer routine and 
- * motor control upon successful password entry.
- * * HARDWARE CONFIGURATION:
- * - Buzzer: RE1 | Motor: RB4 | LEDs: RE0, RB2, RB3
- * - Counters: T0CKI (RA0), T1CKI (RA1)
- ******************************************************************************/
+
 #include "Program_Config.h"
 #include "Init_Variables.h"
 #include "Program_Functions.h"
+#include <stdio.h>
 
 void BuzzerInterruptConfig (void)
 {
@@ -224,7 +207,7 @@ void Count (void)
     T0CON0bits.EN = 0; // Disable timer 0
     TMR0L = 0;
     T0CON0bits.EN = 1; // Enable timer 0
-    __delay_ms(4000);
+    __delay_ms(2000);
     T0CON0bits.EN = 0; // Disable timer 0
     lowerCount = TMR0L;
     TMR0L = 0;
@@ -240,11 +223,79 @@ void Count (void)
     T1CON = 0b00000000;  // Disable timer 1
     TMR1L = 0;
     T1CON = 0b00000001;  // Enable timer 1
-    __delay_ms(4000);
+    __delay_ms(2000);
     T1CON = 0b00000000;  // Disable timer 1
     upperCount = TMR1L;
     TMR1L = 0;
     /////////////////////////////////////////////////
     CountingRed_B2 = OFF;
     CountingGreen_B3 = OFF;
+    
+    char buffer[16];
+    sprintf(buffer, "%d", lowerCount);
+    LCD_String_xy(2, 9, buffer);
+    sprintf(buffer, "%d", upperCount);
+    LCD_String_xy(2, 8, buffer);
+
+}
+void LCD_Init()
+{
+    // Initialize LATs before enabling outputs
+    LATD = 0x00;             // Clear data port
+    LATAbits.LATA7 = 0;     // RS low
+    LATAbits.LATA6 = 0;     // EN low
+
+    TRISD = 0x00;            // PORTD all output (LCD data)
+    TRISAbits.TRISA7 = 0;   // RA7 output (RS)
+    TRISAbits.TRISA6 = 0;   // RA6 output (EN)
+
+    ANSELD = 0x00;           // PORTD all digital
+    ANSELAbits.ANSELA7 = 0; // RA7 digital
+    ANSELAbits.ANSELA6 = 0; // RA6 digital
+
+    __delay_ms(250);         // Power-on delay
+    LCD_Command(0x38);       // 8-bit, 2-line, 5x7 font
+    LCD_Command(0x01);       // Clear display
+    LCD_Command(0x0C);       // Display on, cursor off
+    LCD_Command(0x06);       // Increment cursor
+}
+
+void LCD_Command(char cmd)
+{
+    ldata = cmd;
+    RS = 0;
+    _EN = 1;
+    NOP();
+    _EN = 0;
+    __delay_ms(3);
+}
+
+void LCD_Char(char dat)
+{
+    ldata = dat;
+    RS = 1;
+    _EN = 1;
+    NOP();
+    _EN = 0;
+    __delay_ms(1);
+}
+
+void LCD_String(const char *msg)
+{
+    while(*msg != 0)
+    {
+        LCD_Char(*msg);
+        msg++;
+    }
+}
+
+void LCD_String_xy(char row, char pos, const char *msg)
+{
+    char location = 0;
+    if(row == 1)
+        location = 0x80 | (pos & 0x0F);
+    else
+        location = 0xC0 | (pos & 0x0F);
+    LCD_Command(location);
+    LCD_String(msg);
 }

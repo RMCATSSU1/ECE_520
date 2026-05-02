@@ -31,12 +31,21 @@
 #define CountingGreen_B3 LATBbits.LATB3
 #define MotorPin_B4 LATBbits.LATB4
 
-// Photoresistor Counting Pins
+// Photo-resistor Counting Pins
 #define LowerCountPin 0u
 #define UpperCountPin 1u
 
-// Seceret Code
+// RS and EN LCD pins
+#define RS LATAbits.LATA7    // RS on RA7
+#define _EN LATAbits.LATA6    // EN on RA6
+#define ldata LATD
+#define LCD_Port TRISD
+
+// Secret Code
 const uint8_t SeceretCode = 0x23;
+
+const char  upperCount_lcd = 0;
+const char  lowerCount_lcd = 0;
 
 // Dynamic Variables/Flags
 volatile uint8_t  upperCount = 0;
