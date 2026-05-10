@@ -1,0 +1,14 @@
+#ifndef PROGRAMVARIABLES_H
+#define PROGRAMVARIABLES_H
+////////////////////////////////////////////////////////////////////////////////
+#define PowerOnLed LATDbits.LATD3
+
+#define myLED  PORTBbits.RB0
+
+#define PWM2_INITIALIZE_DUTY_VALUE 0x0FF
+
+#define MaxLeft 62
+
+#define MaxRight 31
+////////////////////////////////////////////////////////////////////////////////
+#endif
